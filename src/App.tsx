@@ -34,7 +34,7 @@ function App() {
         if (containerWidth) {
           const containerHeight = Math.min(500, containerWidth * 0.75);
 
-          const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+          const margin = { top: 30, right: 30, bottom: 70, left: 80 };
           const width = containerWidth - margin.left - margin.right;
           const height = containerHeight - margin.top - margin.bottom;
 
@@ -55,7 +55,21 @@ function App() {
           const yScale = d3.scaleLinear().domain([0, 200]).range([height, 0]);
 
           const xAxis = d3.axisBottom(xScale).ticks(data.length / 2);
-          const yAxis = d3.axisLeft(yScale).ticks(10);
+          const yAxis = d3.axisLeft(yScale).ticks(5);
+
+          // Set up axis labelling
+          svg
+            .append("text")
+            .attr("x", containerWidth / 1.8)
+            .attr("y", height + 100)
+            .style("fill", "red")
+            .text("X");
+          svg
+            .append("text")
+            .attr("y", containerHeight / 2.2)
+            .attr("x", 30)
+            .style("fill", "red")
+            .text("Y");
 
           g.append("g")
             .call(xAxis)
