@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as d3 from "d3";
 import "./App.css";
 
@@ -13,57 +13,79 @@ function App() {
     [10, 76],
     [33, 150],
     [100, 15],
+    [45, 60],
+    [75, 85],
+    [30, 120],
+    [55, 45],
+    [25, 175],
+    [65, 55],
+    [40, 95],
+    [85, 65],
+    [15, 130],
+    [50, 70],
   ]);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
-    if (svgRef.current) {
-      // Set up container
-      const width = 400;
-      const height = 300;
-      const svg = d3
-        .select(svgRef.current)
-        .attr("width", width)
-        .attr("height", height)
-        .style("overflow", "visible")
-        .style("margin-top", "100px");
+    const drawChart = () => {
+      if (svgRef.current) {
+        const containerWidth = svgRef.current.parentElement?.clientWidth;
+        if (containerWidth) {
+          const containerHeight = Math.min(500, containerWidth * 0.75);
 
-      // Set up scaling
-      const xScale = d3.scaleLinear().domain([0, 100]).range([0, width]);
-      const yScale = d3.scaleLinear().domain([0, 200]).range([height, 0]);
+          const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+          const width = containerWidth - margin.left - margin.right;
+          const height = containerHeight - margin.top - margin.bottom;
 
-      // Set up axis
-      const xAxis = d3.axisBottom(xScale).ticks(data.length);
-      const yAxis = d3.axisLeft(yScale).ticks(10);
-      svg.append("g").call(xAxis).attr("transform", `translate(0, ${height})`);
-      svg.append("g").call(yAxis);
+          const svg = d3
+            .select(svgRef.current)
+            .attr("viewBox", `0 0 ${containerWidth} ${containerHeight}`)
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .attr("width", containerWidth)
+            .attr("height", containerHeight);
 
-      // Set up axis labelling
-      svg
-        .append("text")
-        .attr("x", width / 2)
-        .attr("y", height + 50)
-        .style("fill", "red")
-        .text("X");
-      svg
-        .append("text")
-        .attr("y", height / 2)
-        .attr("x", -50)
-        .style("fill", "red")
-        .text("Y");
+          svg.selectAll("*").remove();
 
-      // Set up data to scatter plot
-      svg
-        .selectAll()
-        .data(data)
-        .enter()
-        .append("circle")
-        .attr("cx", (d) => xScale(d[0]))
-        .attr("cy", (d) => yScale(d[1]))
-        .style("fill", "green")
-        .attr("r", 2);
-    }
+          const g = svg
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+          const xScale = d3.scaleLinear().domain([0, 100]).range([0, width]);
+          const yScale = d3.scaleLinear().domain([0, 200]).range([height, 0]);
+
+          const xAxis = d3.axisBottom(xScale).ticks(data.length / 2);
+          const yAxis = d3.axisLeft(yScale).ticks(10);
+
+          g.append("g")
+            .call(xAxis)
+            .attr("transform", `translate(0, ${height})`);
+          g.append("g").call(yAxis);
+
+          g.selectAll(".point")
+            .data(data)
+            .enter()
+            .append("circle")
+            .classed("point", true)
+            .attr("cx", (d) => xScale(d[0]))
+            .attr("cy", (d) => yScale(d[1]))
+            .attr("r", 5)
+            .style("fill", "green");
+        }
+      }
+    };
+
+    drawChart();
+
+    const handleResize = () => {
+      drawChart();
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, [data]);
 
   return (
